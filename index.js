@@ -6,17 +6,26 @@ var serialPort = new SerialPort("/dev/tty.usbmodem1421", {
 
 serialPort.on("open", function () {
 	console.log('open');
-	serialPort.on('data', function(data) {
-		data = parseInt(data,16);
-		if(Number.isNaN(Number(data)) ){
-			return;
-		}
-		console.log( data );
-		//console.log('data received: ' + data);
-	});
+	serialPort.on('data', function(data){ handleData(data); } );
 	serialPort.write("ls\n", function(err, results) {
 		console.log('err ' + err);
 		console.log('results ' + results);
 	});
 });
 
+var oldData = 0;
+var handleData = function( newData ){
+	newData = parseInt(newData,16);
+	if(Number.isNaN(Number(newData)) ){
+		return;
+	}
+
+	var delta = newData - oldData;
+	//console.log( newData );
+	
+	if(delta > 0 && newData > 250){
+		console.log('hit ' + new Date());
+	}
+
+	oldData = newData;
+}
