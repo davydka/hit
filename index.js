@@ -1,25 +1,22 @@
-var firmata = require("firmata");
-var board = new firmata.Board ('/dev/ttyACM0', function (err) {
-	if(err){
-		console.log(err);
-		return;
-	}
-
-	console.log(board);
-	console.log('connected to arduino');
-
-	board.pinMode(13, board.MODES.OUTPUT);
-	board.digitalWrite(13, board.MODES.HIGH);
-
-	var isOn = true;
-
-	setInterval(function () {
-		if(isOn) {
-			board.digitalWrite(13, board.LOW);
-			isOn = false;
-		}else{
-			board.digitalWrite(13, board.HIGH);
-			isOn = true;
-		}    
-	}, 500);
+var SerialPort = require("serialport").SerialPort
+//var serialPort = new SerialPort("/dev/ttyACM0", {
+var serialPort = new SerialPort("/dev/tty.usbmodem1421", {
+	  baudrate: 115200
 });
+
+serialPort.on("open", function () {
+	console.log('open');
+	serialPort.on('data', function(data) {
+		data = parseInt(data,16);
+		if(Number.isNaN(Number(data)) ){
+			return;
+		}
+		console.log( data );
+		//console.log('data received: ' + data);
+	});
+	serialPort.write("ls\n", function(err, results) {
+		console.log('err ' + err);
+		console.log('results ' + results);
+	});
+});
+
