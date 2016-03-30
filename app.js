@@ -10,7 +10,19 @@ var songs = [
 
 	/* TRUE NOTE */
 	[
-		'true-note'
+		[36], // C
+		[37], // C#
+		[38], // D
+		[39], // D#
+		[40], // E
+		[41], // F
+		[42], // F#
+		[43], // G
+		[44], // G#
+		[45], // A
+		[46], // A#
+		[47], // B
+		[48]  // C
 	],
 
 	/*0 Otters*/
@@ -62,10 +74,9 @@ var songs = [
 
 var selectedSong = 0;
 var partStep = 0;
-var selectedPart = 1;
+var selectedPart = 0;
 var pgminTimestap = process.hrtime();
 var part = songs[selectedSong][selectedPart];
-var trueNote = 50;
 var timer = new nanoTimer();
 
 //INPUT 1 - KICK
@@ -95,10 +106,11 @@ for(var i=0; i < output.getPortCount(); i++){
 input2.on('message', function(deltaTime, message) {
 	//console.log(message);
 	if(message[0]==144 && message[2] > 0){
-		//console.log('12 step');
-		//console.log(message);
-		trueNote = message[1];
-		//setPart(message[1] - 48);
+		setPart(message[1]);
+	}
+
+	if(message[0]==192){
+		setSong(message[1]);
 	}
 });
 
@@ -106,14 +118,12 @@ input2.on('message', function(deltaTime, message) {
 input.on('message', function(deltaTime, message) {
 	//console.log(message);
 	if(message[0]==144 && message[2]>0){
-		//console.log('kick');
 		playNote();
 	}
 });
 
 var setPart = function(selectedPart){
 	var oldPart = selectedPart;
-	//selectedPart = selectedPart;
 	if(selectedPart >= songs[selectedSong].length){
 		selectedPart = songs[selectedSong].length-1
 	}
@@ -128,16 +138,20 @@ var setPart = function(selectedPart){
 	}
 }
 
-var playNote = function(){
-	if(typeof part == 'undefined'){
-		//console.log('true');
-		noteEvent(trueNote);
-		return;
+var setSong = function(songNumber){
+	if(songNumber >= songs.length){
+		selectedSong = songs.length-1;
+	} else {
+		selectedSong = songNumber;
 	}
-	
+
+	setPart(0);
+}
+
+var playNote = function(){
 	if(part.length){
 		noteEvent(part[partStep]);
-		console.log(part[partStep]);
+		//console.log(part[partStep]);
 
 		partStep++;
 		if(partStep >= part.length){
